@@ -4,13 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>176d515c-620d-40c6-8566-0d79f6d92094</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>IJCNN.py</StartupFile>
+    <StartupFile>prof\Mnist.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>IJCNN</Name>
     <RootNamespace>IJCNN</RootNamespace>
+    <InterpreterId>CondaEnv|CondaEnv|cuda</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +22,26 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="IJCNN.py" />
+    <Compile Include="prof\Mnist.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="utils\countNp.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="utils\model.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="utils\pro2qn.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="utils\uty.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="CondaEnv|CondaEnv|cuda" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="prof\" />
+    <Folder Include="utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
