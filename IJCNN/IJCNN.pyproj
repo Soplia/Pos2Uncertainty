@@ -38,6 +38,9 @@
     <Compile Include="utils\assit.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="utils\cdfTest.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="utils\countNp.py">
       <SubType>Code</SubType>
     </Compile>

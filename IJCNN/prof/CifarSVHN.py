@@ -27,7 +27,7 @@ transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,
 testsetCifar = torchvision.datasets.CIFAR10(root='../Dataset/cifar', train=False, download= True, transform=transform)
 testLoaderCifar = torch.utils.data.DataLoader(testsetCifar, batch_size=batchSize, shuffle=True, num_workers=0)
 
-lamda = 0.9
+lamda = 0.7
 classNumber = 10
 modelName = 'CNNEDL' #'CNN', 'EDL', CNNEDL
 datasetNames = ['CIFAR10', 'SVHN']
@@ -50,7 +50,6 @@ for datasetName in datasetNames:
     model.eval()
     accNum = 0.0
     uList = []
-    #predLabeList = []
     
     for j, (images, labels) in enumerate(testLoader):
         outputs = model(images) 
@@ -58,19 +57,18 @@ for datasetName in datasetNames:
             evidence = F.softmax(outputs, dim= 1)
             proErr = 1 - torch.max(evidence, dim= 1).values
             uList.append(proErr.detach())
-            #predLabel = torch.squeeze(torch.argmax(evidence, dim= 1))
-            #predLabeList.append(predLabel)
             accNum += torch.sum(torch.argmax(evidence, dim= 1) == labels).item()
         elif modelName == 'CNNEDL':
             evidence = F.relu(outputs)
             alpha = torch.exp(lamda * evidence)
+            #alpha = evidence + 1
             alphaAcc = torch.sum (alpha, dim = 1, keepdims = True)
             prioriP = alpha / alphaAcc
             u = torch.squeeze(classNumber / alphaAcc) 
             uList.append(u.detach())
-            #predLabel = torch.squeeze(torch.argmax(prioriP, dim= 1))
-            #predLabeList.append(predLabel)
             accNum += torch.sum(torch.argmax(prioriP, dim= 1) == labels).item()
+            torch.save(prioriP, '../Outputs/{}-CNNEDL.out'.format(datasetName))
+
         else:
             evidence = F.relu(outputs)
             alpha = evidence + 1
@@ -78,11 +76,9 @@ for datasetName in datasetNames:
             prioriP = alpha / alphaAcc
             u = torch.squeeze(classNumber / alphaAcc) 
             uList.append(u.detach())
-            #predLabel = torch.squeeze(torch.argmax(prioriP, dim= 1))
-            #predLabeList.append(predLabel)
             accNum += torch.sum(torch.argmax(prioriP, dim= 1) == labels).item()
+            torch.save(prioriP, '../Outputs/{}-EDL.out'.format(datasetName))
 
-    #acc =  accNum / testLabel.shape[0]
     acc =  accNum / len(testLoader.dl.dataset)
     print("{} Test acc= {}".format(datasetName, acc)) 
 
