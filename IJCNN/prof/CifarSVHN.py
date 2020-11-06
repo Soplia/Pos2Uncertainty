@@ -27,9 +27,9 @@ transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,
 testsetCifar = torchvision.datasets.CIFAR10(root='../Dataset/cifar', train=False, download= True, transform=transform)
 testLoaderCifar = torch.utils.data.DataLoader(testsetCifar, batch_size=batchSize, shuffle=True, num_workers=0)
 
-lamda = 0.7
+lamda = 0.1
 classNumber = 10
-modelName = 'CNNEDL' #'CNN', 'EDL', CNNEDL
+modelName = 'EDL' #'CNN', 'EDL', CNNEDL
 datasetNames = ['CIFAR10', 'SVHN']
 lineStyle = {'CIFAR10': '-.k', 'SVHN': '-r'}
 testLoaders = {'CIFAR10': testLoaderCifar, 'SVHN': testLoaderSvhn}
@@ -71,7 +71,8 @@ for datasetName in datasetNames:
 
         else:
             evidence = F.relu(outputs)
-            alpha = evidence + 1
+            alpha = torch.exp(lamda * evidence)
+            #alpha = evidence + 1
             alphaAcc = torch.sum (alpha, dim = 1, keepdims = True)
             prioriP = alpha / alphaAcc
             u = torch.squeeze(classNumber / alphaAcc) 

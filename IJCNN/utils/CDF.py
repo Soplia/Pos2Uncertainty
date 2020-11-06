@@ -3,6 +3,11 @@ import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
+def RatioEntropyMaxEntropy(entropys):
+    maxEntropy = torch.max(entropys)
+    avgRatio = torch.mean(entropys / maxEntropy)
+    return avgRatio
+
 def ShanEntropy(values):
     """
     value size= [batchSize, number of classes]
@@ -37,16 +42,19 @@ def VisualiseCDF(values, title= '', visDot= True):
 def MiniDemo():
     values = torch.tensor([[1, 0, 0], [0.1, 0.4, 0.5], [.3, .6, 0.1]])
     H = ShanEntropy(values)
-    VisualiseCDF(H)
+    ratio = RatioEntropyMaxEntropy(H)
+    print (ratio)
 
-#datasetNames = ['CIFAR10', 'SVHN']
-#for datasetName in datasetNames:
-#    prob = torch.load('../Outputs/{}-EDL.out'.format(datasetName))
+datasetNames = ['CIFAR10', 'SVHN']
+for datasetName in datasetNames:
+    prob = torch.load('../Outputs/{}-EDL.out'.format(datasetName))
+    entropys = ShanEntropy(prob)
+    #VisualiseCDF(shanProb)
+    ratio = RatioEntropyMaxEntropy(entropys)
+    print ('Entropy ratio of {}= {}'.format(datasetName, ratio))
+
+#models = ['CNNEDL', 'EDL']
+#for model in models:
+#    prob = torch.load('../Outputs/SVHN-{}.out'.format(model))
 #    shanProb = ShanEntropy(prob)
-#    VisualiseCDF(shanProb)
-
-models = ['CNNEDL', 'EDL']
-for model in models:
-    prob = torch.load('../Outputs/SVHN-{}.out'.format(model))
-    shanProb = ShanEntropy(prob)
-    VisualiseCDF(shanProb, title = model)
+#    VisualiseCDF(shanProb, title = model)

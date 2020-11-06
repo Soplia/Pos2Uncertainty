@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>176d515c-620d-40c6-8566-0d79f6d92094</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>prof\CifarSVHN.py</StartupFile>
+    <StartupFile>scoreComparision\OodDetectionComparison-pretrainedT.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -35,27 +35,51 @@
     <Compile Include="prof\Mnist.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="scoreComparision\GetModelOutputs-pretrained.py" />
+    <Compile Include="scoreComparision\GetModelOutputs.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="scoreComparision\OodDetectionComparison-pretrainedT.py" />
+    <Compile Include="scoreComparision\OodDetectionComparison-pretrained-other.py" />
+    <Compile Include="scoreComparision\OodDetectionComparison-pretrained.py" />
+    <Compile Include="scoreComparision\OodDetectionComparison.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="prof\plotTC - Copy - Copy.py" />
+    <Compile Include="profn\TcPlot.py" />
     <Compile Include="utils\assit.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="utils\cdfTest.py">
+    <Compile Include="utils\CalCriteria.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="utils\CalScores.py" />
+    <Compile Include="utils\CDF.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="utils\countNp.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="alpha\DemoScores.py" />
+    <Compile Include="plot\FreqFpr95Plot.py" />
+    <Compile Include="plot\HistPlot.py" />
     <Compile Include="utils\model.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="utils\pro2qn.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plot\ROcPlot.py" />
     <Compile Include="utils\uty.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|cuda" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="alpha\" />
+    <Folder Include="scoreComparision\" />
+    <Folder Include="plot\" />
+    <Folder Include="profn\" />
     <Folder Include="prof\" />
     <Folder Include="utils\" />
   </ItemGroup>
