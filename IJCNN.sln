@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.779
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "IJCNN", "IJCNN\IJCNN.pyproj", "{176D515C-620D-40C6-8566-0D79F6D92094}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "IJCNN", "IJCNN\IJCNN.pyproj", "{D837E9B6-C316-481A-AAF7-62788BFA13CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,13 +11,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{176D515C-620D-40C6-8566-0D79F6D92094}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{176D515C-620D-40C6-8566-0D79F6D92094}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D837E9B6-C316-481A-AAF7-62788BFA13CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D837E9B6-C316-481A-AAF7-62788BFA13CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {CCACB2D0-2A6B-4712-AF99-F281730D80DF}
+		SolutionGuid = {77ED116E-A12E-42D1-B62D-3C23537006D0}
 	EndGlobalSection
 EndGlobal

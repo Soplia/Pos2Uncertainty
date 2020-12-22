@@ -9,39 +9,133 @@ import torchvision.transforms as transforms
 import numpy as np
 from scipy import misc
 
-to_np = lambda x: x.data.cpu().numpy()
-concat = lambda x: np.concatenate(x, axis=0)
+#to_np = lambda x: x.data.cpu().numpy()
+#concat = lambda x: np.concatenate(x, axis=0)
 
-#'Softmax', 'Energy', 'Dirichlet', 'Our'
-def GetScores(input, T= 10, method = 'Our', classNum= 10):
+#'Softmax', 'Energy', 'Dirichlet', 'Our', 'uUncertainty'
+def GetScores(input, T= 1, method = 'Our', classNum= 10):
     if method == 'Our':
+        #input = torch.sigmoid(input)
+        E = -T * torch.log(torch.sum(torch.exp(input/T), dim = 1)) #tensor([-12.3223])
+        K = classNum # 10
+        la = K  # 10
+        val1 = E + T*np.log(K) #tensor([-10.0197]
+        val2 = la* val1 #tensor([100.1968])
+        m_empty_set = torch.exp(val2) #INF
+        m_empty_set = torch.clamp(m_empty_set, min= 0, max= 1)
+        return -m_empty_set
         # Consists in estimating uncertainty with eq4 of Energy based paper and compute belief to selected class
-        alpha = torch.exp(input / T)
-        Salpha = torch.sum(alpha, dim = 1)
-        scorese, _ = torch.max(input, 1)
-        #U Can be negative which Salpha < 1
-        U = T * torch.log(Salpha)
-        #首先不消减信息来获取U, 加上K个singleton正好凑足11个
-        #然后计算属于空集的不确定性
-        input = F.relu(input)
-        Nscore = torch.sum(input, 1) + U
-        sc = scorese / Nscore
-        return sc
+        #T = 10
+        #alpha = torch.exp(input / T) 
+        #Salpha = torch.sum(alpha, dim = 1) #tensor([11.6443])
+        #U = T * torch.log(Salpha) #tensor([24.5482])
+        #scorese, _ = torch.max(input, 1) #tensor([12.3210])
+        #input = F.relu(input)
+        #Nscore = torch.sum(input, 1) + U #tensor([42.6449])
+        #sc = scorese / Nscore #tensor([0.2889])
+        #return sc
+        #T = 10
+        #alpha = torch.exp(input / T) 
+        #Salpha = torch.sum(alpha, dim = 1) #tensor([11.6443])
+        ##U Can be negative which Salpha < 1
+        #U = T * torch.log(Salpha) #tensor([24.5482])
+        #scorese, _ = torch.max(input, 1) #tensor([12.3210])
+        ##首先不消减信息来获取U, 加上K个singleton正好凑足11个
+        ##然后计算属于空集的不确定性
+        #input = F.relu(input)
+        #Nscore = torch.sum(input, 1) + U #tensor([42.6449])
+        #sc = scorese / Nscore #tensor([0.2889])
+        #return sc
+    elif method == 'emptyset':
+        E = -T * torch.log(torch.sum(torch.exp(input/T), dim = 1)) 
+        K = classNum
+        la = K #Setting la = K
+        m_empty_set = torch.exp(la*(E + T*np.log(K)))
+        m_empty_set = torch.clamp(m_empty_set,0,1)
+        return m_empty_set
+
+    elif method == 'omega':
+        E = -T * torch.log(torch.sum(torch.exp(input/T), dim = 1)) 
+        K = classNum
+        la = K #Setting la = K
+        m_empty_set = torch.exp(la*(E + T*np.log(K)))
+        m_empty_set = torch.clamp(m_empty_set,0,1)
+        #p = torch.exp(input / T) / torch.sum(torch.exp(input / T), dim= 1) #Normalized distribution
+        p = torch.exp(input / T) / torch.sum(torch.exp(input / T), dim= 1).unsqueeze(dim= 1).repeat(1, input.shape[1])
+        H = -torch.sum(p*torch.log(p), dim= 1)
+        #H = H.unsqueeze(dim= 1).repeat(1, p.shape[1])
+        Hn= torch.clamp(H / (-np.log(1/K)), 0, 1) # normalized version [0, 1]
+        m_omega = 1 - m_empty_set
+        m_omega = torch.where(m_omega > Hn, Hn, m_omega)
+        return m_omega
+
+    elif method == 'mass':
+        E = -T * torch.log(torch.sum(torch.exp(input/T), dim = 1)) 
+        K = classNum
+        la = K #Setting la = K
+        m_empty_set = torch.exp(la*(E + T*np.log(K)))
+        m_empty_set = torch.clamp(m_empty_set,0,1)
+        #p = torch.exp(input / T) / torch.sum(torch.exp(input / T), dim= 1) #Normalized distribution
+        p = torch.exp(input / T) / torch.sum(torch.exp(input / T), dim= 1, keepdim= True)#.unsqueeze(dim= 1).repeat(1, input.shape[1])
+        H = -torch.sum(p*torch.log(p), dim= 1)
+        #H = H.unsqueeze(dim= 1).repeat(1, p.shape[1])
+        Hn= torch.clamp(-H / np.log(1/K), 0, 1) # normalized version [0, 1]
+        m_omega = 1 - m_empty_set
+        m_omega = torch.where(m_omega > Hn, Hn, m_omega)
+        #m_omega = Hn
+        m = torch.clamp(p / torch.sum(p, dim= 1, keepdim= True) * (1 - m_empty_set - m_omega).unsqueeze(dim= 1).repeat(1, p.shape[1]),0,1)
+        #m = torch.clamp((p / torch.sum(p) * (1 - m_empty_set - m_omega)).unsqueeze(dim= 1).repeat(1, p.shape[1]),0,1)
+        return m
+         
+    elif method == 'pos2pro':
+        mass1 = input.clone()
+        mass1, idx1 = torch.sort(mass1, descending= True, dim= 1)
+        mass2 = mass1.clone()
+        pad = nn.ZeroPad2d(padding=(0, 1, 0, 0))
+        mass2 = pad(mass2)[:, 1::]
+        mass1 = mass1 - mass2
+        reversedMass1 = torch.flip(mass1, [1])
+        reversedMass1 = torch.cumsum(reversedMass1, dim= 1)
+        mass1 = torch.flip(reversedMass1, [1])
+        count = torch.flip(torch.linspace(1, 10, 10), [0]).repeat(mass1.shape[0], 1)
+        pro = mass1 / count
+        _, idx2 = torch.sort(idx1, descending= True, dim= 1)
+        for i in range (pro.shape[0]):
+            pro[i] = pro[i].index_select(0, idx2[i])
+        return torch.flip(pro, [1]).T
+
+    elif method == 'uUncertainty':
+        inputs= F.relu(input)
+        uTensor = torch.zeros(input.shape[0])
+        for i, input in enumerate(inputs):
+            inHist = torch.histc(input, bins=11, min=0, max= 1.0)
+            reversedInHist = torch.flip(inHist, [0])
+            reversedInHist = torch.cumsum(reversedInHist, dim= 0)
+            #print ('reversedInHist= {}'.format(reversedInHist))
+            ellF = torch.max(input)
+            uUncertainty = 0.1 / ellF * (torch.sum(torch.log2(reversedInHist)))
+            #print (uUncertainty)    
+            uTensor[i] = uUncertainty
+        return uTensor
+
     elif method == 'Energy':
         # Consists in estimating uncertainty with eq4 of Energy based paper and compute belief to selected class
+        T = 1
         alpha = torch.exp(input / T)
-        Salpha = torch.sum(alpha,dim = 1)
+        Salpha = torch.sum(alpha, dim = 1)
         U = T * torch.log(Salpha)
         return U
+
     elif method == 'Dirichlet':
         alpha = 1+ F.relu(input)
         Salpha = torch.sum(alpha, dim = 1)
         U = classNum / Salpha
-        return U
-    else :
-        input = F.relu(input)
-        intput = F.softmax(input, dim= 1)
-        scores, _ = torch.max(intput, dim= 1)
+        return 1 - U
+
+    elif method== 'Softmax' :
+        T = 1
+        sf = torch.exp(input / T) / torch.sum(torch.exp(input / T))
+        scores, _ = torch.max(sf, dim= 1)
         return scores
 
 def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, in_dist=False):
@@ -121,7 +215,8 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1):
 
     return nnOutputs
 
-def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precision, layer_index, magnitude, num_batches, in_dist=False):
+def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precision, layer_index,
+                         magnitude, num_batches, in_dist=False):
     '''
     Compute the proposed Mahalanobis confidence score on input dataset
     return: Mahalanobis score from layer_index
@@ -145,6 +240,7 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
         for i in range(num_classes):
             batch_sample_mean = sample_mean[layer_index][i]
             zero_f = out_features.data - batch_sample_mean
+            #Performs a matrix multiplication of the matrices input and mat2
             term_gau = -0.5*torch.mm(torch.mm(zero_f, precision[layer_index]), zero_f.t()).diag()
             if i == 0:
                 gaussian_score = term_gau.view(-1,1)

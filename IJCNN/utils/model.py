@@ -36,7 +36,6 @@ class BasicBlock(nn.Module):
         else:
             return torch.add(x, out)
 
-
 class NetworkBlock(nn.Module):
     def __init__(self, nb_layers, in_planes, out_planes, block, stride, dropRate=0.0):
         super(NetworkBlock, self).__init__()
@@ -50,7 +49,6 @@ class NetworkBlock(nn.Module):
 
     def forward(self, x):
         return self.layer(x)
-
 
 class WideResNet(nn.Module):
     def __init__(self, depth, num_classes, widen_factor=1, dropRate=0.0):
